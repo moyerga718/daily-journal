@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react"
 
-export const EntryForm = ({ entry, moods, onFormSubmit }) => {
+export const EntryForm = ({ entry, moods, tags, onFormSubmit }) => {
     const [editMode, setEditMode] = useState(false)
     const [updatedEntry, setUpdatedEntry] = useState(entry)
+    const [tagBooleans, setTagBooleans] = useState([false,false,false,false])
+    const [selectedTags, setSelectedTags] = useState([])
 
     useEffect(() => {
         setUpdatedEntry(entry)
@@ -14,16 +16,47 @@ export const EntryForm = ({ entry, moods, onFormSubmit }) => {
         }
     }, [entry])
 
+    useEffect(
+        () => {
+            let selectedTagIds = []
+            for (let i = 1; i<5; i++) {
+                if (tagBooleans[i-1] === true) {
+                    selectedTagIds.push(i)
+                }
+            }
+            setSelectedTags(selectedTagIds)
+        },
+        [tagBooleans]
+    )
+
+    useEffect(
+        () => {
+            let entryCopy = {...updatedEntry}
+            entryCopy.tags = selectedTags
+            setUpdatedEntry(entryCopy)
+        },
+        [selectedTags]
+    )
+
     const handleControlledInputChange = (event) => {
         /*
             When changing a state object or array, always create a new one
             and change state instead of modifying current one
         */
-        const newEntry ={...updatedEntry}
+        const newEntry = { ...updatedEntry }
         newEntry[event.target.name] = event.target.value
         setUpdatedEntry(newEntry)
     }
 
+    const handleTagBoolChange = (tagId) => {
+        const boolCopy = [...tagBooleans]
+        if (boolCopy[(tagId) - 1] === false) {
+            boolCopy[(tagId) - 1] = true
+        } else {
+            boolCopy[(tagId) - 1] = false
+        }
+        setTagBooleans(boolCopy)
+    }
 
 
     const constructNewEntry = () => {
@@ -33,6 +66,7 @@ export const EntryForm = ({ entry, moods, onFormSubmit }) => {
             copyEntry.date = Date(Date.now()).toLocaleString('en-us').split('GMT')[0]
         }
         onFormSubmit(copyEntry)
+        setTagBooleans([false,false,false,false])
     }
 
     return (
@@ -70,15 +104,38 @@ export const EntryForm = ({ entry, moods, onFormSubmit }) => {
                                     proptype="int"
                                     value={updatedEntry.moodId}
                                     onChange={handleControlledInputChange}>
-                                        <option value="0">Select a mood</option>
-                                        {moods.map(m => (
-                                            <option key={m.id} value={m.id}>
-                                                {m.label}
-                                            </option>
-                                        ))}
+                                    <option value="0">Select a mood</option>
+                                    {moods.map(m => (
+                                        <option key={m.id} value={m.id}>
+                                            {m.label}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                         </div>
+                    </div>
+                    <div className="field">
+                        <label htmlFor="tagId" className="label">Tags</label>
+                        <div className="control">
+                            <div className="checkboxes">
+                                {
+                                    tags.map(tag => (
+                                        <div>
+                                            <p>{tag.name}</p>
+                                            <input
+                                                type="checkbox"
+                                                id="topping"
+                                                name="topping"
+                                                value={tag.id}
+                                                onChange={() => handleTagBoolChange(tag.id)}
+                                                checked={tagBooleans[(tag.id) - 1]}
+                                            />
+                                        </div>
+                                    ))
+                                }
+                            </div>
+                        </div>
+
                     </div>
                     <div className="field">
                         <div className="control">

@@ -1,0 +1,9 @@
+.tag-div {
+    border: solid gray 1px;
+    padding: 0.5rem;
+    margin: 0.5rem;
+}
+
+.entry__tag__container {
+    display: flex;
+}
